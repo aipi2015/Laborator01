@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -25,7 +26,7 @@ public class DatabaseOperationsImplementation implements DatabaseOperations {
 
 	private DatabaseOperationsImplementation() {
 	}
-	
+
 	public void releaseResources() {
 		try {
 			closeConnection();
@@ -36,7 +37,7 @@ public class DatabaseOperationsImplementation implements DatabaseOperations {
 			}
 		}
 	}
-	
+
 	public static DatabaseOperationsImplementation getInstance() {
 		if (instance == null) {
 			instance = new DatabaseOperationsImplementation();
@@ -85,13 +86,27 @@ public class DatabaseOperationsImplementation implements DatabaseOperations {
 	}
 
 	public int getTableNumberOfRows(String tableName) throws SQLException {
+		openConnection();
+		Statement statement = createStatement();
 		int numberOfRows = -1;
-		// TODO: exercise 1
+		try {
+			String query = "SELECT COUNT(*) FROM " + tableName;
+			ResultSet result = statement.executeQuery(query);
+			result.next();
+			numberOfRows = result.getInt(1);
+		} catch (SQLException sqlException) {
+			System.out.println("An exception has occurred: " + sqlException.getMessage());
+			if (Constants.DEBUG) {
+				sqlException.printStackTrace();
+			}
+		} finally {
+			destroyStatement(statement);
+		}
 		return numberOfRows;
 	}
 
 	public int getTableNumberOfColumns(String tableName) throws SQLException {
-		openConnection();		
+		openConnection();
 		int numberOfColumns = 0;
 		ResultSet result = databaseMetaData.getColumns(Constants.DATABASE_NAME, null, tableName, null);
 		while (result.next()) {
@@ -109,7 +124,7 @@ public class DatabaseOperationsImplementation implements DatabaseOperations {
 	}
 
 	public ArrayList<String> getTablePrimaryKeys(String tableName) throws SQLException {
-		openConnection();		
+		openConnection();
 		ArrayList<String> primaryKeys = new ArrayList<>();
 		ResultSet result = databaseMetaData.getPrimaryKeys(Constants.DATABASE_NAME, null, tableName);
 		while (result.next()) {
@@ -162,14 +177,14 @@ public class DatabaseOperationsImplementation implements DatabaseOperations {
 				query.append("*");
 			} else {
 				numberOfColumns = attributes.size();
-				for (String attribute: attributes) {
+				for (String attribute : attributes) {
 					query.append(attribute + ", ");
 				}
 				query.setLength(query.length() - 2);
 			}
 			if (numberOfColumns == -1) {
 				return null;
-			}			
+			}
 			query.append(" FROM " + tableName);
 			if (whereClause != null) {
 				query.append(" WHERE " + whereClause);
@@ -224,12 +239,12 @@ public class DatabaseOperationsImplementation implements DatabaseOperations {
 				throw new DatabaseException("The number of attributes (" + attributes.size()
 						+ ") does not match the number of values (" + values.size() + ")");
 			}
-			for (String attribute: attributes) {
+			for (String attribute : attributes) {
 				query.append(attribute + ", ");
 			}
 			query.setLength(query.length() - 2);
 			query.append(") VALUES (");
-			for (String currentValue: values) {
+			for (String currentValue : values) {
 				query.append("\'" + currentValue + "\',");
 			}
 			query.setLength(query.length() - 1);
@@ -287,11 +302,38 @@ public class DatabaseOperationsImplementation implements DatabaseOperations {
 
 	public int deleteRecordsFromTable(String tableName, ArrayList<String> attributes, ArrayList<String> values,
 			String whereClause) throws SQLException, DatabaseException {
+		openConnection();
+		Statement statement = createStatement();
 		int result = -1;
-		// TODO: exercise 5a
+		try {
+			StringBuilder query = new StringBuilder("DELETE FROM " + tableName + " WHERE ");
+			if (whereClause != null) {
+				query.append(whereClause);
+			} else {
+				if (attributes.size() != values.size()) {
+					throw new DatabaseException("The number of attributes (" + attributes.size()
+							+ ") does not match the number of values (" + values.size() + ")");
+				}
+				for (int currentIndex = 0; currentIndex < values.size(); currentIndex++) {
+					query.append(attributes.get(currentIndex) + "=\'" + values.get(currentIndex) + "\' AND");
+				}
+				query.setLength(query.length() - 4);
+			}
+			if (Constants.DEBUG) {
+				System.out.println("query: " + query);
+			}
+			result = statement.executeUpdate(query.toString());
+		} catch (SQLException sqlException) {
+			System.out.println("An exception has occurred: " + sqlException.getMessage());
+			if (Constants.DEBUG) {
+				sqlException.printStackTrace();
+			}
+		} finally {
+			destroyStatement(statement);
+		}
 		return result;
 	}
-	
+
 	public boolean executeQuery(String query) throws SQLException {
 		Statement statement = null;
 		boolean result = false;
@@ -313,13 +355,64 @@ public class DatabaseOperationsImplementation implements DatabaseOperations {
 
 	public ArrayList<String> executeStoredRoutine(String storedRoutineName, ArrayList<String> parameterTypes,
 			ArrayList<String> inputParameterValues, ArrayList<Integer> outputParameterDataTypes) throws SQLException {
-		// TODO: exercise 7
-		return null;
+		openConnection();
+		ArrayList<String> result = new ArrayList<>();
+		ArrayList<Integer> resultPosition = new ArrayList<>();
+		StringBuilder query = new StringBuilder("{ CALL " + storedRoutineName + "(");
+		int parameterNumber = parameterTypes.size();
+		for (int currentIndex = 0; currentIndex < parameterNumber; currentIndex++) {
+			query.append("?, ");
+		}
+		if (parameterNumber != 0) {
+			query.setLength(query.length() - 2);
+		}
+		query.append(") }");
+		CallableStatement statement = connection.prepareCall(query.toString());
+		try {
+			int inputParameterIndex = 0, outputParameterIndex = 0, resultIndex = 1;
+			for (String parameterType : parameterTypes) {
+				switch (parameterType) {
+				case "IN":
+					statement.setString(resultIndex, inputParameterValues.get(inputParameterIndex++));
+					break;
+				case "OUT":
+					statement.registerOutParameter(resultIndex,
+							outputParameterDataTypes.get(outputParameterIndex++).intValue());
+					resultPosition.add(resultIndex);
+					break;
+				case "INOUT":
+					statement.setString(resultIndex, inputParameterValues.get(inputParameterIndex++));
+					statement.registerOutParameter(resultIndex,
+							outputParameterDataTypes.get(outputParameterIndex++).intValue());
+					resultPosition.add(resultIndex);
+					break;
+				}
+				resultIndex++;
+			}
+			statement.execute();
+			for (Integer currentIndex : resultPosition) {
+				result.add(statement.getString(currentIndex.intValue()));
+			}
+		} catch (SQLException sqlException) {
+			System.out.println("An exception has occurred: " + sqlException.getMessage());
+			if (Constants.DEBUG) {
+				sqlException.printStackTrace();
+			}
+		} finally {
+			destroyStatement(statement);
+		}
+		return result;
 	}
 
 	public ArrayList<Referrence> getReferrences(String tableName) throws SQLException {
-		// TODO: exercise 8
-		return null;
+		openConnection();
+		ArrayList<Referrence> referencedTables = new ArrayList<>();
+		ResultSet result = databaseMetaData.getImportedKeys(Constants.DATABASE_NAME, null, tableName);
+		while (result.next()) {
+			referencedTables.add(new Referrence(result.getString("PKTABLE_NAME"), result.getString("FKTABLE_NAME"),
+					result.getString("PKCOLUMN_NAME"), result.getString("FKCOLUMN_NAME")));
+		}
+		return referencedTables;
 	}
 
 	public void runScript(String fileName) throws SQLException {
@@ -373,16 +466,16 @@ public class DatabaseOperationsImplementation implements DatabaseOperations {
 			}
 		}
 	}
-	
+
 	private void setAutoCommit(boolean autoCommit) throws SQLException {
 		openConnection();
 		connection.setAutoCommit(autoCommit);
 	}
-	
+
 	public void startTransaction() throws SQLException {
 		setAutoCommit(false);
 	}
-	
+
 	public void endTransactionWithCommit() throws SQLException {
 		try {
 			connection.commit();
@@ -395,7 +488,7 @@ public class DatabaseOperationsImplementation implements DatabaseOperations {
 			setAutoCommit(true);
 		}
 	}
-	
+
 	public void endTransactionWithRollback() throws SQLException {
 		try {
 			connection.rollback();

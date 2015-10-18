@@ -4,7 +4,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class Exercise08Test {
-	
+
 	@BeforeClass
 	public static void executeExercise08() {
 		BookStore bookstore = new BookStore();

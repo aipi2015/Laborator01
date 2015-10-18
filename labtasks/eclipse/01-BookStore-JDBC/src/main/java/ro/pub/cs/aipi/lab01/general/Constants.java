@@ -13,6 +13,6 @@ public interface Constants {
 
 	final public static String INPUT_DIRECTORY = "input";
 	final public static String OUTPUT_DIRECTORY = "output";
-	
-    final public static long SEED = 20152015L;
+
+	final public static long SEED = 20152015L;
 }

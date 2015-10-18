@@ -1,59 +1,60 @@
 package ro.pub.cs.aipi.lab01.helper;
 
 public class Referrence {
-	private String parentTable;
-	private String childTable;
-	private String parentAttributeName;
-	private String childAttributeName;
 
-	public Referrence() {
-		parentTable = new String();
-		childTable = new String();
-		parentAttributeName = new String();
-		childAttributeName = new String();
-	}
+    private String parentTable;
+    private String childTable;
+    private String parentAttributeName;
+    private String childAttributeName;
 
-	public Referrence(String parentTable, String childTable, String parentAttributeName, String childAttributeName) {
-		this.parentTable = parentTable;
-		this.childTable = childTable;
-		this.parentAttributeName = parentAttributeName;
-		this.childAttributeName = childAttributeName;
-	}
+    public Referrence() {
+        parentTable = new String();
+        childTable = new String();
+        parentAttributeName = new String();
+        childAttributeName = new String();
+    }
 
-	public String getParentTable() {
-		return parentTable;
-	}
+    public Referrence(String parentTable, String childTable, String parentAttributeName, String childAttributeName) {
+        this.parentTable = parentTable;
+        this.childTable = childTable;
+        this.parentAttributeName = parentAttributeName;
+        this.childAttributeName = childAttributeName;
+    }
 
-	public String getChildTable() {
-		return childTable;
-	}
+    public String getParentTable() {
+        return parentTable;
+    }
 
-	public String getParentAttributeName() {
-		return parentAttributeName;
-	}
+    public String getChildTable() {
+        return childTable;
+    }
 
-	public String getChildAttributeName() {
-		return childAttributeName;
-	}
+    public String getParentAttributeName() {
+        return parentAttributeName;
+    }
 
-	public void setParentTable(String parentTable) {
-		this.parentTable = parentTable;
-	}
+    public String getChildAttributeName() {
+        return childAttributeName;
+    }
 
-	public void setChildTable(String childTable) {
-		this.childTable = childTable;
-	}
+    public void setParentTable(String parentTable) {
+        this.parentTable = parentTable;
+    }
 
-	public void setParentAttributeName(String parentAttributeName) {
-		this.parentAttributeName = parentAttributeName;
-	}
+    public void setChildTable(String childTable) {
+        this.childTable = childTable;
+    }
 
-	public void setChildAttributeName(String childAttributeName) {
-		this.childAttributeName = childAttributeName;
-	}
+    public void setParentAttributeName(String parentAttributeName) {
+        this.parentAttributeName = parentAttributeName;
+    }
 
-	@Override
-	public String toString() {
-		return childTable + "/" + childAttributeName + " referrences " + parentTable + "/" + parentAttributeName;
-	}
+    public void setChildAttributeName(String childAttributeName) {
+        this.childAttributeName = childAttributeName;
+    }
+
+    @Override
+    public String toString() {
+        return childTable + "/" + childAttributeName + " referrences " + parentTable + "/" + parentAttributeName;
+    }
 }

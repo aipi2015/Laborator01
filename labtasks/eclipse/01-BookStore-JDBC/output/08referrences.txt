@@ -1,0 +1,15 @@
+author/book_id referrences book/id
+author/writer_id referrences writer/id
+book/collection_id referrences collection/id
+book_presentation/book_id referrences book/id
+book_presentation/language_id referrences language/id
+category_content/book_id referrences book/id
+category_content/category_id referrences category/id
+collection/publishing_house_id referrences publishing_house/id
+invoice_header/user_id referrences user/id
+invoice_line/book_presentation_id referrences book_presentation/id
+invoice_line/invoice_header_id referrences invoice_header/id
+publishing_house/country_id referrences country/id
+supply_order_header/publishing_house_id referrences publishing_house/id
+supply_order_line/book_presentation_id referrences book_presentation/id
+supply_order_line/supply_order_header_id referrences supply_order_header/id

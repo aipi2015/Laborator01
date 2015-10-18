@@ -4,11 +4,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class Exercise06Test {
-	
+
 	@BeforeClass
 	public static void executeExercise06() {
 		BookStore bookstore = new BookStore();
-		bookstore.exercise06();		
+		bookstore.exercise06();
 	}
 
 	@Test
@@ -16,5 +16,5 @@ public class Exercise06Test {
 		System.out.println("Test06 -SELECT- checkFileContent");
 		AllTests.fileComparison("06writers_bibliography.txt");
 	}
-	
+
 }

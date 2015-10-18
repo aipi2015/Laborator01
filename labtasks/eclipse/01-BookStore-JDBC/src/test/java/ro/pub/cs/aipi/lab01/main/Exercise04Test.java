@@ -6,9 +6,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class Exercise04Test {
-	
+
 	final private static int NUMBER_OF_RECORDS = 4104;
-	
+
 	@BeforeClass
 	public static void executeExercise04() {
 		BookStore bookstore = new BookStore();
@@ -20,7 +20,7 @@ public class Exercise04Test {
 			System.out.println("Test passed!");
 		}
 	}
-	
+
 	@Test
 	public void checkFileContent() {
 		System.out.println("Test04 -UPDATE- checkFileContent");
