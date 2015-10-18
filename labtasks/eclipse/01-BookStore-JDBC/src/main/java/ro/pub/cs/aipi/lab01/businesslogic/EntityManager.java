@@ -34,23 +34,7 @@ public class EntityManager {
 	}
 
 	public int create(ArrayList<String> values) {
-		DatabaseOperations databaseOperations = null;
-		try {
-			databaseOperations = DatabaseOperationsImplementation.getInstance();
-			int result = databaseOperations.insertValuesIntoTable(table, null, values, true);
-			if (result != 1) {
-				if (Constants.DEBUG) {
-					System.out.println("Insert operation failed!");
-				}
-				return -1;
-			}
-			return result;
-		} catch (DatabaseException | SQLException exception) {
-			System.out.println("An exception has occurred: " + exception.getMessage());
-			if (Constants.DEBUG) {
-				exception.printStackTrace();
-			}
-		}
+		// TODO: exercise 3
 		return -1;
 	}
 

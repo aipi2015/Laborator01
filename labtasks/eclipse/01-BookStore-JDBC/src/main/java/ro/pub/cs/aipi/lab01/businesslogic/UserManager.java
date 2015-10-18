@@ -33,13 +33,12 @@ public class UserManager extends EntityManager {
 				inputParameterValues.add(personalIdentifier);
 				ArrayList<Integer> outputParameterDataTypes = new ArrayList<>();
 				outputParameterDataTypes.add(java.sql.Types.FLOAT);
-				String userTotalInvoiceValue = databaseOperations
-						.executeStoredRoutine("calculate_user_total_invoice_value", parameterTypes,
-								inputParameterValues, outputParameterDataTypes)
-						.get(0);
+				ArrayList<String> userTotalInvoiceValue = databaseOperations.executeStoredRoutine(
+						"calculate_user_total_invoice_value", parameterTypes, inputParameterValues,
+						outputParameterDataTypes);
 				currentRecord.add(personalIdentifier);
 				if (userTotalInvoiceValue != null) {
-					currentRecord.add(userTotalInvoiceValue);
+					currentRecord.add(userTotalInvoiceValue.get(0));
 				} else {
 					currentRecord.add("0.00");
 				}

@@ -89,11 +89,13 @@ public class BookStore {
 					StandardOpenOption.APPEND);
 			for (String table : databaseOperations.getTableNames()) {
 				ArrayList<Referrence> referrences = databaseOperations.getReferrences(table);
-				StringBuilder result = new StringBuilder();
-				for (Referrence referrence : referrences) {
-					result.append(referrence.toString() + "\n");
+				if (referrences != null) {
+					StringBuilder result = new StringBuilder();
+					for (Referrence referrence : referrences) {
+						result.append(referrence.toString() + "\n");
+					}
+					bufferedWriter.write(result.toString(), 0, result.length());
 				}
-				bufferedWriter.write(result.toString(), 0, result.length());
 			}
 			bufferedWriter.close();
 		} catch (IOException ioException) {
